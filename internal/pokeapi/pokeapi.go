@@ -1,4 +1,4 @@
-package main
+package pokeapi
 
 import (
 	"encoding/json"
@@ -18,7 +18,7 @@ type Location_area_list struct {
 	} `json:"results"`
 }
 
-func printNames(url string) (previous string, next string) {
+func PrintNames(url string) (previous string, next string) {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)

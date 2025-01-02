@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Drnel/btdv_go_pokedex/internal/pokeapi"
 )
 
 type cliCommand struct {
@@ -101,7 +103,7 @@ func commandMap(config *config) error {
 	} else if config.next != "initial" {
 		url = config.next
 	}
-	config.previous, config.next = printNames(url)
+	config.previous, config.next = pokeapi.PrintNames(url)
 	return nil
 }
 func commandMapB(config *config) error {
@@ -112,6 +114,6 @@ func commandMapB(config *config) error {
 	} else {
 		url = config.previous
 	}
-	config.previous, config.next = printNames(url)
+	config.previous, config.next = pokeapi.PrintNames(url)
 	return nil
 }
