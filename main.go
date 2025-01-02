@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Drnel/btdv_go_pokedex/internal/pokeapi"
+	"github.com/Drnel/btdv_go_pokedex/internal/pokecache"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, *pokecache.Cache) error
 }
 
 type config struct {
@@ -27,6 +29,7 @@ func main() {
 		previous: "",
 		next:     "initial",
 	}
+	cache := pokecache.NewCache(time.Second * 50)
 	for {
 		fmt.Print("Pokedex > ")
 		input_scanner.Scan()
@@ -39,7 +42,7 @@ func main() {
 		commands := getCommands()
 		command, ok := commands[first_word]
 		if ok {
-			err := command.callback(&config)
+			err := command.callback(&config, &cache)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -80,13 +83,13 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 }
-func commandExit(config *config) error {
+func commandExit(config *config, cache *pokecache.Cache) error {
 	fmt.Print("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(config *config) error {
+func commandHelp(config *config, cache *pokecache.Cache) error {
 	fmt.Print("Welcome to the Pokedex!\nUsage:\n\n")
 	commands := getCommands()
 	for _, command := range commands {
@@ -95,18 +98,18 @@ func commandHelp(config *config) error {
 	return nil
 }
 
-func commandMap(config *config) error {
-	url := "https://pokeapi.co/api/v2/location-area?limit=20"
+func commandMap(config *config, cache *pokecache.Cache) error {
+	url := "https://pokeapi.co/api/v2/location-area?offset=0&limit=20"
 	if config.next == "" {
 		fmt.Println("you're on the last page")
 		return nil
 	} else if config.next != "initial" {
 		url = config.next
 	}
-	config.previous, config.next = pokeapi.PrintNames(url)
+	config.previous, config.next = pokeapi.PrintLANames(url, cache)
 	return nil
 }
-func commandMapB(config *config) error {
+func commandMapB(config *config, cache *pokecache.Cache) error {
 	url := ""
 	if config.previous == "" {
 		fmt.Println("you're on the first page")
@@ -114,6 +117,6 @@ func commandMapB(config *config) error {
 	} else {
 		url = config.previous
 	}
-	config.previous, config.next = pokeapi.PrintNames(url)
+	config.previous, config.next = pokeapi.PrintLANames(url, cache)
 	return nil
 }
